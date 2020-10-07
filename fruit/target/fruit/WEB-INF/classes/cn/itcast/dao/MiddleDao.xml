@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.itcast.dao.MiddleDao">
+    <select id="getByContractId" parameterType="java.lang.Integer"
+            resultType="cn.itcast.domain.Middle">
+        select * from middle where contractid = #{id}
+    </select>
+
+    <insert id="addMiddle" parameterType="cn.itcast.domain.Middle">
+        insert into middle(contractid,fruitid,number) values (#{contractid},#{fruitid},#{number})
+    </insert>
+
+    <delete id="delContract" parameterType="java.lang.Integer">
+        delete  from middle where contractid =#{contractid}
+    </delete>
+</mapper>

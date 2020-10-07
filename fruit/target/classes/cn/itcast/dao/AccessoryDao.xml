@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.itcast.dao.AccessoryDao">
+    <!--<resultMap id="accessoryMap" type="cn.itcast.domain.Accessory">
+        <id property="accessoryid" column="accessoryid"></id>
+        <result property="name" column="name"></result>
+        <result property="price" column="price"></result>
+        <result property="createtime" column="createtime"></result>
+        <association property="commodities" javaType="cn.itcast.domain.Commodities">
+            <id property="fruitid" column="fruitid"></id>
+            <result property="name" column="name"></result>
+            <result property="price" column="price"></result>
+            <result property="locality" column="locality"></result>
+            <result property="createtime" column="createtime"></result>
+        </association>
+    </resultMap>-->
+    <select id="findAccessory" parameterType="java.lang.Integer" resultType="cn.itcast.domain.Accessory">
+        select * from accessory  where fruitid=#{fruitid};
+    </select>
+</mapper>

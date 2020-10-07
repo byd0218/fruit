@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.itcast.dao.UserDao">
+    <sql id="defaultUser">
+        select * from user
+    </sql>
+    <select id="findAll" resultType="cn.itcast.domain.User">
+        <include refid="defaultUser"></include>
+    </select>
+
+    <select id="testLogin" resultType="cn.itcast.domain.User">
+        <include refid="defaultUser"></include>
+        where username=#{username} and password=#{password}
+    </select>
+
+    <insert id="register" parameterType="cn.itcast.domain.User">
+        insert into user(username,password,name,telephone)values
+        (#{username},#{password},#{name},#{telephone});
+    </insert>
+
+<!--    按条件查找用户-->
+    <select id="findUserByCondition" resultType="cn.itcast.domain.User"
+            parameterType="cn.itcast.domain.User">
+        select * from user
+        <where>
+            <if test="username != null and username!=''">
+                and username like '%${username}%'
+            </if>
+            <if test="name != null and name != ''">
+                and name like '%${name}%'
+            </if>
+            <if test="telephone != null and telephone != ''">
+                and telephone like '%${telephone}%'
+            </if>
+        </where>
+    </select>
+
+    <update id="updatePassword" parameterType="cn.itcast.domain.User">
+        update user set password=#{password} where userid=#{userid}
+    </update>
+
+<!--    查找出数据库中与注册名相同的用户-->
+    <select id="getSameUsername" parameterType="java.lang.String"
+            resultType="cn.itcast.domain.User">
+        select * from user where username=#{username};
+    </select>
+</mapper>

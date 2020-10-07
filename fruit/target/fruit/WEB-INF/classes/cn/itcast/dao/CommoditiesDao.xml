@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.itcast.dao.CommoditiesDao">
+    <select id="findCommodities" resultType="cn.itcast.domain.Commodities"
+            parameterType="java.util.Map">
+        select * from commodities
+        <where>
+            <if test="name != null">
+                and name like '%${name}%'
+            </if>
+            <if test="startPrice != null">
+                <![CDATA[ and price >= #{startPrice}]]>
+            </if>
+            <if test="endPrice != null">
+                <![CDATA[ and price <= #{endPrice}]]>
+            </if>
+            <if test="locality != null">
+                and locality like '%${locality}%'
+            </if>
+
+            <if test="startTime != null">
+                <![CDATA[ and createtime >= DATE_FORMAT(#{startTime},'%Y-%m-%d %H:%i:%s')]]>
+            </if>
+            <if test="endTime != null">
+                <![CDATA[ and createtime <= DATE_FORMAT(#{endTime},'%Y-%m-%d %H:%i:%s')]]>
+            </if>
+
+             <if test="fruitid != null">
+                 and fruitid = #{fruitid}
+             </if>
+        </where>
+    </select>
+
+    <insert id="addCommodities" parameterType="cn.itcast.domain.Commodities">
+        INSERT INTO commodities(name, price,locality,createtime) VALUES
+        (#{name},#{price},#{locality},#{createtime});
+    </insert>
+
+    <delete id="delCommodities" parameterType="java.lang.Integer">
+        delete from commodities where fruitid=#{fruitid};
+    </delete>
+
+    <update id="updateCommodities" parameterType="cn.itcast.domain.Commodities">
+        update commodities set name=#{name},locality=#{locality},price=#{price}
+        where fruitid=#{fruitid}
+    </update>
+
+    <select id="findAllCommodities" resultType="cn.itcast.domain.Commodities">
+        select * from commodities
+    </select>
+
+    <select id="getById" parameterType="java.lang.Integer"
+            resultType="cn.itcast.domain.Commodities">
+        select * from commodities where fruitid = #{id}
+    </select>
+</mapper>

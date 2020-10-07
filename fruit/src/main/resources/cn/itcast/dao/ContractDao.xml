@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.itcast.dao.ContractDao">
+    
+    <resultMap id="contractVoMap" type="cn.itcast.domain.ContractVo">
+        <id column="contractid" property="contractid"></id>
+        <result column="barcode" property="barcode"></result>
+        <result column="retailer_name" property="retailerName"></result>
+        <result column="type" property="type"></result>
+        <result column="createtime" property="createtime"></result>
+    </resultMap>
+    <select id="findAllContract" resultMap="contractVoMap" parameterType="java.util.Map">
+        SELECT c.contractid , c.barcode , c.type ,c.createtime, r.name as retailer_name
+         FROM contract c LEFT JOIN retailer r ON r.retailerid = c.retailerid
+        <where>
+            <if test="barcode != null and !barcode.equals('')">
+                and c.barcode like '%${barcode}%'
+            </if>
+            <if test="retailerName != null and !retailerName.equals('')">
+                and r.name like '%${retailerName}%'
+            </if>
+            <if test="type != null">
+                and c.type like '%${type}%'
+            </if>
+            <if test="startTime != null">
+                <![CDATA[ and c.createtime >= DATE_FORMAT(#{startTime},'%Y-%m-%d %H:%i:%s')]]>
+            </if>
+            <if test="endTime != null">
+                <![CDATA[ and c.createtime <= DATE_FORMAT(#{endTime},'%Y-%m-%d %H:%i:%s')]]>
+            </if>
+        </where>
+    </select>
+    <delete id="delContract" parameterType="java.lang.Integer">
+        delete from contract where contractid=#{contractid}
+    </delete>
+
+<!--    根据合同contractid获取该合同的信息与零售商（一对一）的信息-->
+    <resultMap id="contractMap" type="cn.itcast.domain.Contract">
+        <id property="contractid" column="contractid"></id>
+        <result property="barcode" column="barcode"></result>
+        <result property="type" column="type"></result>
+        <result property="createtime" column="createtime"></result>
+        <association property="retailer" javaType="cn.itcast.domain.Retailer">
+            <id property="retailerid" column="retailerid"></id>
+            <result property="name" column="name"></result>
+            <result property="address" column="address"></result>
+            <result property="telephone" column="telephone"></result>
+        </association>
+    </resultMap>
+    <select id="getContractDetail" resultMap="contractMap" resultType="cn.itcast.domain.Contract">
+        SELECT c.contractid , c.barcode , c.type ,c.createtime, r.retailerid, r.name,
+        r.telephone,r.address FROM contract c LEFT JOIN retailer r ON r.retailerid = c.retailerid
+        <where>
+            c.contractid = #{contractid}
+        </where>
+    </select>
+    
+    <resultMap id="contractCommoditiesMap" type="cn.itcast.domain.Contract">
+        <id property="contractid" column="contractid"></id>
+        <result property="barcode" column="barcode"></result>
+        <result property="type" column="type"></result>
+        <result property="createtime" column="createtime"></result>
+        <collection property="commoditiesList" ofType="cn.itcast.domain.Commodities">
+            <id property="fruitid" column="fruitid"></id>
+            <result property="name" column="name"></result>
+            <result property="price" column="price"></result>
+            <result property="locality" column="locality"></result>
+        </collection>
+    </resultMap>
+<!--    根据合同contractid查找与该合同相关联的商品货物的信息（一对多）-->
+<!--    注意：ct.contractid一定要写在select语句中，否则查出来的水果信息不在同一个合同对象中-->
+    <!--<select id="getContractCommodities" resultMap="contractCommoditiesMap"
+            parameterType="java.lang.Integer" resultType="cn.itcast.domain.Contract">
+        SELECT ct.contractid,cm.name,cm.price,cm.locality FROM contract ct
+         left outer join middle_tab m on ct.contractid = m.contractid
+         left outer join commodities cm on cm.fruitid = m.fruitid
+         where ct.contractid=#{contractid}
+    </select>-->
+    <select id="getContractCommodities" resultMap="contractCommoditiesMap"
+            parameterType="java.lang.Integer" resultType="cn.itcast.domain.Contract">
+        SELECT ct.contractid,cm.name,cm.price,cm.locality FROM contract ct
+         left outer join middle m on ct.contractid = m.contractid
+         left outer join commodities cm on cm.fruitid = m.fruitid
+         where ct.contractid=#{contractid}
+    </select>
+
+<!--    执行插入操作后，获取该记录的contractid-->
+    <insert id="addOneContract" parameterType="cn.itcast.domain.Contract">
+        <selectKey keyProperty="contractid" keyColumn="contractid" resultType="java.lang.Integer"
+                   order="AFTER">
+            select last_insert_id();
+        </selectKey>
+        insert into contract(barcode,type,retailerid,createtime) values (#{barcode},#{type},#{retailerid},#{createtime})
+    </insert>
+
+    <update id="editContract" parameterType="cn.itcast.domain.Contract">
+        update contract set type
+        =#{type},retailerid=#{retailerid},createtime=#{createtime} where contractid=#{contractid}
+    </update>
+
+<!--    删除零售商之前判断该零售商是否有合同，有的话先删除合同，没有的话可以直接删除-->
+    <select id="isExitContract" parameterType="java.lang.Integer" resultType="cn.itcast.domain.Contract">
+        select * from contract where retailerid=#{retailerid}
+    </select>
+
+</mapper>
